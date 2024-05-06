@@ -1,5 +1,11 @@
 package com.mobile.zalukaev_lab3
+
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ObjectAnimator
 import android.os.Bundle
+import android.os.Handler
+import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageView
@@ -30,5 +36,27 @@ class MainActivity : AppCompatActivity() {
     private fun shootBullet() {
         val bulletAnim = AnimationUtils.loadAnimation(this, R.anim.bullet_animation)
         bullet.startAnimation(bulletAnim)
+
+        // Задерживаем распад стены на 1 секунду после запуска анимации пули
+        Handler().postDelayed({
+            // Создаем эффект распада стены
+            val wallAnimator = ObjectAnimator.ofFloat(wall, View.ALPHA, 1.0f, 0f).apply {
+                duration = 500 // продолжительность анимации распада
+
+                // Добавляем слушателя, чтобы показать стену после окончания анимации
+                addListener(object : AnimatorListenerAdapter() {
+                    override fun onAnimationEnd(animation: Animator) {
+                        wall.visibility = View.VISIBLE // Показываем стену
+                        // После показа стены, создаем анимацию исчезновения
+                        val wallAnimator = ObjectAnimator.ofFloat(wall, View.ALPHA, 0f, 1.0f).apply {
+                            duration = 500 // продолжительность анимации исчезновения
+                        }
+                        wallAnimator.start()
+                    }
+                })
+            }
+            wallAnimator.start()
+
+        }, 300) // 1000 миллисекунд = 1 секунда задержки
     }
 }
